@@ -23,21 +23,21 @@ upgrade your main browser to unstable? this chrome-in-docker project can help yo
 
 # Usage
 
-You may either just pull my prebuilt docker image at https://hub.docker.com/r/c0b0/chrome-stable/
+You may either just pull my prebuilt docker image at https://hub.docker.com/r/liuzheng712/chrome-in-docker/
 
-    $ docker pull c0b0/chrome-stable
-    $ docker run -it --rm c0b0/chrome-stable /opt/google/chrome/google-chrome --version
-    Google Chrome 52.0.2743.116
+    $ docker pull liuzheng712/chrome-in-docker
+    $ docker run -it --rm liuzheng712/chrome-in-docker google-chrome --version
+    Google Chrome 70.0.3538.67
 
 Or build it locally with Dockerfile here
 
-    $ docker build -t chrome-stable:20160813 .
+    $ docker build -t chrome:20181018 .
 
 Check what Chrome version is builtin, and tag a version:
 
-    $ docker run -it --rm chrome-stable:20160813 /opt/google/chrome/google-chrome --version
-    Google Chrome 52.0.2743.116
-    $ docker tag chrome-stable:20160813 chrome-stable:52.0.2743.116
+    $ docker run -it --rm chrome:20181018 google-chrome --version
+    Google Chrome 70.0.3538.67
+    $ docker tag chrome:20181018 chrome:70.0.3538.67
 
 The extra `get-latest-chrome.sh` script here is to get latest versions of
 Chrome Stable, Beta, or Unstable version, for testing some latest features,
@@ -58,97 +58,78 @@ and latest Chrome binary packages.
 
 You may test run it one time first to check what's exact version of each Chrome channel:
 
-    $ docker run -it --rm -v $PWD/opt:/opt:ro chrome:20160813 \
+    $ docker run -it --rm -v $PWD/opt:/opt:ro chrome:20181018 \
                              /opt/google/chrome-unstable/google-chrome-unstable --version
-    Google Chrome 54.0.2824.0 dev
+    Google Chrome 71.0.3578.10 dev
 
-    $ docker run -it --rm -v $PWD/opt:/opt:ro chrome:20160813 \
+    $ docker run -it --rm -v $PWD/opt:/opt:ro chrome:20181018 \
                              /opt/google/chrome-beta/google-chrome-beta --version
-    Google Chrome 53.0.2785.57 beta
+    Google Chrome 70.0.3538.67 beta
 
-    $ docker run -it --rm -v $PWD/opt:/opt:ro chrome:20160813 \
+    $ docker run -it --rm -v $PWD/opt:/opt:ro chrome:20181018 \
                              /opt/google/chrome/google-chrome --version
-    Google Chrome 52.0.2743.116
+    Google Chrome 70.0.3538.67
 
 Then run 3 different containers with the same base docker image:
 
 ```console
-$ docker run -dt \
-             --name Chrome-dev-54.0.2824.0 \
-             -h chrome-dev-54.local \
+$ docker run -dt --privileged \
+             --name Chrome-dev-71.0.3578.10 \
+             -h chrome-dev-71.local \
              -v $PWD/opt:/opt:ro \
              -e CHROME=/opt/google/chrome-unstable/google-chrome-unstable \
-         chrome:20160813
+             -p 9221:9222 \
+         chrome:20181018
 56417156ffea4a55642cfa59cf5e9758a2be144144b2df39e91aa9265f098b75
-$ docker run -dt \
-             --name Chrome-beta-53.0.2785.57 \
-             -h chrome-beta-53.local \
+$ docker run -dt --privileged \
+             --name Chrome-beta-70.0.3538.67 \
+             -h chrome-beta-70.local \
              -v $PWD/opt:/opt:ro \
              -e CHROME=/opt/google/chrome-beta/google-chrome-beta \
-         chrome:20160813
+             -p 9222:9222 \
+         chrome:20181018
 d5b784cbe9ac7d3a52b43c7fb6918b28366c8b939293b10fb9b1808de7b46e2e
-$ docker run -dt \
-             --name Chrome-stable-52.0.2743.116 \
-             -h chrome-beta-52.local \
+$ docker run -dt --privileged \
+             --name Chrome-stable-70.0.3538.67 \
+             -h chrome-beta-70.local \
              -v $PWD/opt:/opt:ro \
-             chrome:20160813
+             -p 9223:9222 \
+             chrome:20181018
 35974a5247cf8650da25d03d9f279749ae4cf1e5b0c57349af1d511b8ac99545
 
 $ docker ps -a
 CONTAINER ID  IMAGE            COMMAND      CREATED  STATUS  PORTS  NAMES
-35974a5247cf  chrome:20160813  "/entry.sh"  ...                     Chrome-stable-52.0.2743.116
-d5b784cbe9ac  chrome:20160813  "/entry.sh"  ...                     Chrome-beta-53.0.2785.57
-56417156ffea  chrome:20160813  "/entry.sh"  ...                     Chrome-dev-54.0.2824.0
-```
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                    NAMES
+f6e8d2d311e0        chrome:20181018     "/entry.sh"         5 seconds ago       Up 3 seconds        0.0.0.0:9223->9222/tcp   Chrome-stable-70.0.3538.67
+7574033cb9fd        chrome:20181018     "/entry.sh"         12 seconds ago      Up 11 seconds       0.0.0.0:9222->9222/tcp   Chrome-beta-70.0.3538.67
+8602d8f59014        chrome:20181018     "/entry.sh"         18 seconds ago      Up 17 seconds       0.0.0.0:9221->9222/tcp   Chrome-dev-71.0.3578.10
 
-To connect the chrome in docker, you may either use port mappings, let it call proper
-iptables to set up proper mappings; or use inspect to find out the ip addresses
-of each container:
-
-    $ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' Chrome-dev-54.0.2824.0
-    172.18.0.4
-
-That means the chrome browser's Chrome Debugging Protocol can be accessed by `172.18.0.4:9222`
-
-    $ curl -s 172.18.0.4:9222/json/version
-    {
-       "Browser": "Chrome/54.0.2824.0",
-       "Protocol-Version": "1.1",
-       "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2824.0 Safari/537.36",
-       "WebKit-Version": "537.36 (@facabd3224aecbcab4bea9daadad31c67488d78c)"
-    }
-
-Or, if you use docker port mapping, like:
-
-```console
-         #  this one is not using any local volume binding on /opt, so it's using the builtin Chrome at build time,
-$ docker run -dt \
-             --name Chrome-stable-builtin-52.0.2743.116 \
-             -h chrome-stable-52.local \
-             -p 9222:9222 \
-         chrome:20160813
-e9a3738f2d642e5d1a4dd895750d1a09ddece3dd187c82309ade99e1b4123027
-$ docker ps -a
-CONTAINER ID  IMAGE            COMMAND      CREATED        STATUS         PORTS                     NAMES
-e9a3738f2d64  chrome:20160813  "/entry.sh"  3 seconds ago  Up 3 seconds   0.0.0.0:9222->9222/tcp   Chrome-stable-builtin-52.0.2743.116
-
-        # by inspect we know we can access this container by 172.18.0.2:9222
-$ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' Chrome-stable-builtin-52.0.2743.116
-172.18.0.2
-$ curl -s 172.18.0.2:9222/json/version
+$ curl -s localhost:9221/json/version
 {
-   "Browser": "Chrome/52.0.2743.116",
-   "Protocol-Version": "1.1",
-   "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36",
-   "WebKit-Version": "537.36 (@9115ecad1cae66fd5fe52bd9120af643384fd6f3)"
-}
-        # by above port mapping, this container can also be accessed by 0.0.0.0:9222; if it's from localhost Linux, 
+   "Browser": "Chrome/71.0.3578.10",
+   "Protocol-Version": "1.3",
+   "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.10 Safari/537.36",
+   "V8-Version": "7.1.302.3",
+   "WebKit-Version": "537.36 (@a04d4e218f0813212aa325e038e8961b62fd40ff)",
+   "webSocketDebuggerUrl": "ws://localhost:9221/devtools/browser/5ff8258a-3cdb-46f1-b22e-f5d9c70ca156"
+} 
 $ curl -s localhost:9222/json/version
 {
-   "Browser": "Chrome/52.0.2743.116",
-   "Protocol-Version": "1.1",
-   "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36",
-   "WebKit-Version": "537.36 (@9115ecad1cae66fd5fe52bd9120af643384fd6f3)"
+   "Browser": "Chrome/70.0.3538.67",
+   "Protocol-Version": "1.3",
+   "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36",
+   "V8-Version": "7.0.276.28",
+   "WebKit-Version": "537.36 (@9ab0cfab84ded083718d3a4ff830726efd38869f)",
+   "webSocketDebuggerUrl": "ws://localhost:9222/devtools/browser/a49fd215-8555-4d57-b69c-ac6c9ca27009"
+}
+$ curl -s localhost:9223/json/version
+{
+   "Browser": "Chrome/70.0.3538.67",
+   "Protocol-Version": "1.3",
+   "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36",
+   "V8-Version": "7.0.276.28",
+   "WebKit-Version": "537.36 (@9ab0cfab84ded083718d3a4ff830726efd38869f)",
+   "webSocketDebuggerUrl": "ws://localhost:9223/devtools/browser/ef2d5cae-d236-4369-a500-a919ce6cd45c"
 }
 ```
 
