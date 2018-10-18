@@ -2,6 +2,7 @@
 FROM ubuntu
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV APP=''
 
 RUN set -xe \
     && apt-get update \
