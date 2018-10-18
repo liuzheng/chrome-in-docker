@@ -9,6 +9,7 @@ RUN set -xe \
     && apt-get install -y --no-install-recommends xvfb x11vnc fluxbox xterm \
     && apt-get install -y --no-install-recommends sudo \
     && apt-get install -y --no-install-recommends supervisor \
+    && apt-get install -y --no-install-recommends gnupg \
     && rm -rf /var/lib/apt/lists/*
 
 RUN set -xe \
