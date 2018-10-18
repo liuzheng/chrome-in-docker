@@ -6,10 +6,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN set -xe \
     && apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl socat \
-    && apt-get install -y --no-install-recommends xvfb x11vnc fluxbox xterm \
-    && apt-get install -y --no-install-recommends sudo \
-    && apt-get install -y --no-install-recommends supervisor \
-    && apt-get install -y --no-install-recommends gnupg \
+    xvfb x11vnc fluxbox xterm \
+    sudo \
+    supervisor \
+    gnupg \
+    ttf-wqy-microhei \
     && rm -rf /var/lib/apt/lists/*
 
 RUN set -xe \
