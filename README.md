@@ -23,10 +23,10 @@ upgrade your main browser to unstable? this chrome-in-docker project can help yo
 
 # Usage
 
-You may either just pull my prebuilt docker image at https://hub.docker.com/r/liuzheng712/chrome-in-docker/
+You may either just pull my prebuilt docker image at https://hub.docker.com/r/liuzheng/chrome-in-docker/
 
-    $ docker pull liuzheng712/chrome-in-docker
-    $ docker run -it --rm liuzheng712/chrome-in-docker google-chrome --version
+    $ docker pull liuzheng/chrome-in-docker
+    $ docker run -it --rm liuzheng/chrome-in-docker google-chrome --version
     Google Chrome 70.0.3538.67
 
 Or build it locally with Dockerfile here
