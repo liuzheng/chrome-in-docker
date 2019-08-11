@@ -10,6 +10,7 @@ RUN set -xe \
     xvfb x11vnc xterm \
     sudo \
     supervisor \
+    awesome \
     gnupg \
     ttf-wqy-microhei \
     && curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
