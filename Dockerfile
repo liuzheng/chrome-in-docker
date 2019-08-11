@@ -4,7 +4,6 @@ FROM ubuntu
 ENV DEBIAN_FRONTEND=noninteractive
 ENV APP=''
 
-COPY ./sources.list /etc/apt/sources.list
 RUN set -xe \
     && apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl \
